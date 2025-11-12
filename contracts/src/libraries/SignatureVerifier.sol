@@ -16,14 +16,18 @@ library SignatureVerifier {
                s := mload(add(signature, 64))
                v := byte(0, mload(add(signature, 96)))
           }
-
+          
+          // some signing tools produce v as 0 or 1 (common in some libraries)
           if (v < 27) {
                v += 27;
           }
 
           require(v == 27 || v == 28, "Invalid signature v value");
 
-          return ecrecover(ethSignedMessageHash, v, r, s);
+          address signer = ecrecover(ethSignedMessageHash, v, r, s);
+          require(signer != address(0), "Invalid signature");
+          
+          return signer;
      }
 
      function verifySignatures(bytes32 messageHash, bytes[] memory signatures, mapping(address => bool) storage validators, uint256 minValidators) internal view returns (bool) {
