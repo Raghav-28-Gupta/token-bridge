@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract BridgeToken{
+import "./interfaces/IBridgeToken.sol";
+
+contract BridgeToken is IBridgeToken{
      string public name;
      string public symbol;
      uint8 public decimals;

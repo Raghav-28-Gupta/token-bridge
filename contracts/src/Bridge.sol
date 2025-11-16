@@ -60,6 +60,7 @@ contract Bridge is IBridge, Ownable, ReentrancyGuard, Pausable{
 
         if (token == NATIVE_TOKEN) {
             require(msg.value == amount, "Incorrect native token amount");
+            // ETH is now in Bridge contract
         } else {
             require(msg.value == 0, "No native token expected");
             
