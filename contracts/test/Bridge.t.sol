@@ -132,7 +132,7 @@ contract BridgeTest is Test{
         bridge.deposit(address(token), 100 ether, user, SOURCE_CHAIN);
      }
 
-     // withdraw tests tmrw
+     // Withdraw Tests 
      function signMessage(bytes32 messageHash, uint256 privateKey) internal pure returns (bytes memory) {
           bytes32 ethSignedHash = MessageLib.toEthSignedMessageHash(messageHash);
           
@@ -187,5 +187,72 @@ contract BridgeTest is Test{
           bridge.withdraw(address(token), user, 100 ether, 42, SOURCE_CHAIN, signatures);
      }
 
+     function testWithdrawRevertsOnDuplicateSignatures() public {
+          bytes32 messageHash = bridge.getMessageHash(address(token), user, 100 ether, 42, SOURCE_CHAIN);
+          
+          bytes[] memory signatures = new bytes[](2);
+          signatures[0] = signMessage(messageHash, validator1Key);
+          signatures[1] = signMessage(messageHash, validator1Key);
+
+          vm.expectRevert("Duplicate signature");
+          bridge.withdraw(address(token), user, 100 ether, 42, SOURCE_CHAIN, signatures);
+     }
+
+     function testWithdrawRevertsOnReplay() public {
+          uint256 amount = 100 ether;
+          uint256 nonce = 42;
+          
+          token.mint(address(bridge), amount * 2);
+          
+          bytes32 messageHash = bridge.getMessageHash(
+               address(token),
+               user,
+               amount,
+               nonce,
+               SOURCE_CHAIN
+          );
+          
+          bytes[] memory signatures = new bytes[](2);
+          signatures[0] = signMessage(messageHash, validator1Key);
+          signatures[1] = signMessage(messageHash, validator2Key);
+          
+          // First withdraw 
+          bridge.withdraw(address(token), user, amount, nonce, SOURCE_CHAIN, signatures);
+          
+          // Second withdraw
+          vm.expectRevert("Already processed");
+          bridge.withdraw(address(token), user, amount, nonce, SOURCE_CHAIN, signatures);
+     }
+
+     // Admin Tests
+     function testAddValidator() public {
+          address newValidator = makeAddr("newValidator");
+          bridge.addValidator(newValidator);
+          assertTrue(bridge.isValidator(newValidator));
+     }
+     
+     function testRemoveValidator() public {
+          bridge.removeValidator(validator1);
+          assertFalse(bridge.isValidator(validator1));
+     }
+
+     function testSetMinValidators() public {
+        bridge.setMinValidators(3);
+        assertEq(bridge.minValidators(), 3);
+     }
+     
+     function testPauseAndUnpause() public {
+          bridge.pause();
+          assertTrue(bridge.paused());
+          
+          bridge.unpause();
+          assertFalse(bridge.paused());
+     }
+     
+     function testOnlyOwnerCanAddValidator() public {
+          vm.prank(user);
+          vm.expectRevert("Ownable: caller is not the owner");
+          bridge.addValidator(makeAddr("newValidator"));
+     }
 }
 
