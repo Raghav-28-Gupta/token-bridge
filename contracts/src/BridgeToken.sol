@@ -83,7 +83,7 @@ contract BridgeToken{
           emit Transfer(address(0), to, amount);
      }
 
-     function Burn(address from, uint256 amount) external onlyBridge{
+     function burnFromBridge(address from, uint256 amount) external onlyBridge{
           require(from != address(0), "From Address Zero");
           require(amount > 0, "Amount must be > 0");
           
@@ -91,10 +91,10 @@ contract BridgeToken{
           balanceOf[from] -= amount;
 
           emit Burn(from, amount);
-          emit Transfer(from, address(0), value);
+          emit Transfer(from, address(0), amount);
      }
 
-     function updateBridge(address newBridge) external onlyBridge(){
+     function updateBridge(address newBridge) external onlyBridge{
           require(newBridge != address(0), "Invalid bridge address");
 
           address oldBridge = bridge;
@@ -103,7 +103,7 @@ contract BridgeToken{
           emit BridgeUpdated(oldBridge, newBridge);
      }
 
-     function transferOwnership(address newOwner) {
+     function transferOwnership(address newOwner) external onlyOwner{
           require(newOwner != address(0), "Invalid owner address");
           owner = newOwner;
      }
