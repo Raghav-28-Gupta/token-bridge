@@ -5,6 +5,7 @@ import "../lib/forge-std/src/Test.sol";
 import "../src/Bridge.sol";
 import "../src/BridgeToken.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../src/libraries/MessageLib.sol";
 
 
 contract MockERC20 is ERC20{
@@ -132,8 +133,59 @@ contract BridgeTest is Test{
      }
 
      // withdraw tests tmrw
-     function testWithdrawWithValidSignatures() public{
+     function signMessage(bytes32 messageHash, uint256 privateKey) internal pure returns (bytes memory) {
+          bytes32 ethSignedHash = MessageLib.toEthSignedMessageHash(messageHash);
           
+          (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, ethSignedHash);
+          return abi.encodePacked(r, s, v); // 65 bytes signature
      }
+
+     function testWithdrawWithValidSignatures() public {
+          uint256 amount = 100 ether;
+          uint256 nonce = 42;
+
+          // fund bridge with tokens
+          token.mint(address(bridge), amount);
+
+          bytes32 messageHash = bridge.getMessageHash(address(token), user, amount, nonce, SOURCE_CHAIN);
+
+          // get signatures from validators
+          bytes[] memory signatures = new bytes[](2);
+          signatures[0] = signMessage(messageHash, validator1Key);
+          signatures[1] = signMessage(messageHash, validator2Key);
+
+          bridge.withdraw(address(token), user, amount, nonce, SOURCE_CHAIN, signatures);
+
+          assertEq(bridgeToken.balanceOf(user), amount);
+     }
+
+     function testWithdrawNativeToken() public {
+          uint256 amount = 1 ether;
+          uint256 nonce = 42;
+
+          // fund bridge
+          vm.deal(address(bridge), amount);
+
+          bytes32 messageHash = bridge.getMessageHash(address(0), user, amount, nonce, SOURCE_CHAIN);
+          bytes[] memory signatures = new bytes[](2);
+          signatures[0] = signMessage(messageHash, validator1Key);
+          signatures[1] = signMessage(messageHash, validator2Key);
+
+          uint256 balanceBefore = user.balance;
+          bridge.withdraw(address(0), user, amount, nonce, SOURCE_CHAIN, signatures);
+          
+          assertEq(user.balance, balanceBefore + amount);
+     }
+
+     function testWithdrawRevertsOnInsufficientSignatures() public {
+          bytes32 messageHash = bridge.getMessageHash(address(token), user, 100 ether, 42, SOURCE_CHAIN);
+          
+          bytes[] memory signatures = new bytes[](1);
+          signatures[0] = signMessage(messageHash, validator1Key);
+
+          vm.expectRevert("Insufficient signatures");
+          bridge.withdraw(address(token), user, 100 ether, 42, SOURCE_CHAIN, signatures);
+     }
+
 }
 
