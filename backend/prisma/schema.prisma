@@ -17,7 +17,6 @@ model BridgeTransaction {
   id            String   @id @default(uuid())
   txHash        String   @unique
   targetTxHash  String?  @unique
-  messageHash   String   @unique
   
   // Chain info
   sourceChain   Int
@@ -48,7 +47,6 @@ model BridgeTransaction {
   @@index([recipient])
   @@index([sender])
   @@index([createdAt])
-  @@index([messageHash])
 }
 
 model ValidatorSignature {
