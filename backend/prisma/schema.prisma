@@ -6,10 +6,83 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model BridgeTransaction {
+  id            String   @id @default(uuid())
+  txHash        String   @unique
+  targetTxHash  String?  @unique
+  messageHash   String   @unique
+  
+  // Chain info
+  sourceChain   Int
+  targetChain   Int
+  
+  // Transaction details
+  token         String
+  sender        String
+  recipient     String
+  amount        String   // Store as string to avoid precision issues
+  nonce         Int
+  
+  // Block info
+  blockNumber   Int
+  
+  // Status tracking
+  status        String   // pending, relaying, completed, failed
+  error         String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([sourceChain, nonce])
+  @@index([sourceChain, blockNumber])
+  @@index([targetChain])
+  @@index([status])
+  @@index([recipient])
+  @@index([sender])
+  @@index([createdAt])
+  @@index([messageHash])
+}
+
+model ValidatorSignature {
+  id              String   @id @default(uuid())
+  
+  // Transaction reference
+  txHash          String
+  
+  // Signature info
+  validator       String
+  signature       String
+  messageHash     String
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  
+  @@index([txHash])
+  @@index([validator])
+  @@index([messageHash])
+}
+
+model ChainState {
+  id              String   @id @default(uuid())
+  
+  // Chain info
+  chainId         Int      @unique
+  chainName       String
+  
+  // Sync state
+  lastBlockNumber Int
+  lastSyncedAt    DateTime @default(now())
+  
+  // Metadata
+  updatedAt       DateTime @updatedAt
+  
+  @@index([chainId])
 }

@@ -1,28 +1,42 @@
 {
-  "name": "backend",
+  "name": "@token-bridge/backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Bridge relayer backend service",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
+    "pino-pretty": "^10.2.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
     "winster": "^0.2.14"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
-    "@types/node": "^24.10.0"
+    "@types/node": "^24.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "prisma": "^6.19.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   }
 }
