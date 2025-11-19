@@ -1,14 +1,137 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client"
-}
+// Prisma schema for Bridge Indexer
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model BridgeEvent {
+  id            String   @id @default(uuid())
+  
+  // Event identification
+  txHash        String
+  logIndex      Int
+  eventType     String   // Deposit, Withdraw
+  
+  // Chain info
+  chainId       Int
+  blockNumber   Int
+  blockHash     String
+  timestamp     DateTime
+  
+  // Event data
+  token         String
+  sender        String?  // Only for Deposit
+  recipient     String
+  amount        String
+  nonce         Int
+  
+  // Related chain info
+  sourceChainId Int?     // For Withdraw events
+  targetChainId Int?     // For Deposit events
+  
+  // Metadata
+  createdAt     DateTime @default(now())
+  
+  @@unique([txHash, logIndex])
+  @@index([chainId, blockNumber])
+  @@index([eventType])
+  @@index([token])
+  @@index([recipient])
+  @@index([sender])
+  @@index([nonce])
+  @@index([timestamp])
+}
+
+model Transfer {
+  id              String   @id @default(uuid())
+  
+  // Transfer identification
+  depositTxHash   String
+  withdrawTxHash  String?
+  
+  // Chain info
+  sourceChainId   Int
+  targetChainId   Int
+  
+  // Transfer details
+  token           String
+  sender          String
+  recipient       String
+  amount          String
+  nonce           Int
+  
+  // Status
+  status          String   // pending, completed, failed
+  
+  // Block info
+  depositBlock    Int
+  withdrawBlock   Int?
+  
+  // Timestamps
+  depositTime     DateTime
+  withdrawTime    DateTime?
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([depositTxHash])
+  @@index([sourceChainId, targetChainId])
+  @@index([status])
+  @@index([recipient])
+  @@index([sender])
+  @@index([nonce])
+  @@index([token])
+}
+
+model ChainSync {
+  id              String   @id @default(uuid())
+  
+  // Chain info
+  chainId         Int      @unique
+  chainName       String
+  
+  // Sync state
+  lastBlockNumber Int
+  lastBlockHash   String
+  lastSyncedAt    DateTime @default(now())
+  
+  // Stats
+  totalEvents     Int      @default(0)
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([chainId])
+}
+
+model Stats {
+  id                String   @id @default(uuid())
+  
+  // Date for daily stats
+  date              DateTime @unique
+  
+  // Volume stats
+  totalVolume       String   @default("0")
+  totalTransfers    Int      @default(0)
+  
+  // Chain-specific stats (stored as JSON)
+  volumeByChain     Json     @default("{}")
+  transfersByChain  Json     @default("{}")
+  
+  // Token stats
+  volumeByToken     Json     @default("{}")
+  transfersByToken  Json     @default("{}")
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([date])
 }
