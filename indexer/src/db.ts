@@ -126,16 +126,17 @@ export async function createOrUpdateTransfer(data: {
 	withdrawTime?: Date;
 	status: string;
 }) {
-	return await prisma.transfer.upsert({
-		where: { depositTxHash: data.depositTxHash },
-		update: {
-			withdrawTxHash: data.withdrawTxHash,
-			withdrawBlock: data.withdrawBlock,
-			withdrawTime: data.withdrawTime,
-			status: data.status,
-		},
-		create: data,
-	});
+	const update: Record<string, unknown> = { status: data.status };
+
+     if (data.withdrawTxHash !== undefined) update.withdrawTxHash = data.withdrawTxHash;
+     if (data.withdrawBlock !== undefined) update.withdrawBlock = data.withdrawBlock;
+     if (data.withdrawTime !== undefined) update.withdrawTime = data.withdrawTime;
+
+     return await prisma.transfer.upsert({
+          where: { depositTxHash: data.depositTxHash },
+          update,
+          create: data,
+     });
 }
 
 export async function getTransferByDepositHash(txHash: string) {
