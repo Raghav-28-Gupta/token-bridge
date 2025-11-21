@@ -1,4 +1,4 @@
-// Prisma schema for Bridge Indexer
+// Prisma schema for Bridge Indexer - Simplified for Testing
 
 datasource db {
   provider = "postgresql"
@@ -9,33 +9,33 @@ generator client {
 }
 
 model BridgeEvent {
-  id            String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Event identification
-  txHash        String
-  logIndex      Int
-  eventType     String   // Deposit, Withdraw
-  
+  txHash    String
+  logIndex  Int
+  eventType String // Deposit, Withdraw
+
   // Chain info
-  chainId       Int
-  blockNumber   Int
-  blockHash     String
-  timestamp     DateTime
-  
+  chainId     Int
+  blockNumber Int
+  blockHash   String
+  timestamp   DateTime
+
   // Event data
-  token         String
-  sender        String?  // Only for Deposit
-  recipient     String
-  amount        String
-  nonce         Int
-  
+  token     String
+  sender    String? // Only for Deposit
+  recipient String
+  amount    String
+  nonce     Int
+
   // Related chain info
-  sourceChainId Int?     // For Withdraw events
-  targetChainId Int?     // For Deposit events
-  
+  sourceChainId Int? // For Withdraw events
+  targetChainId Int? // For Deposit events
+
   // Metadata
-  createdAt     DateTime @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@unique([txHash, logIndex])
   @@index([chainId, blockNumber])
   @@index([eventType])
@@ -47,38 +47,38 @@ model BridgeEvent {
 }
 
 model Transfer {
-  id              String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Transfer identification
-  depositTxHash   String
-  withdrawTxHash  String?
-  
+  depositTxHash  String
+  withdrawTxHash String?
+
   // Chain info
-  sourceChainId   Int
-  targetChainId   Int
-  
+  sourceChainId Int
+  targetChainId Int
+
   // Transfer details
-  token           String
-  sender          String
-  recipient       String
-  amount          String
-  nonce           Int
-  
+  token     String
+  sender    String
+  recipient String
+  amount    String
+  nonce     Int
+
   // Status
-  status          String   // pending, completed, failed
-  
+  status String // pending, completed, failed
+
   // Block info
-  depositBlock    Int
-  withdrawBlock   Int?
-  
+  depositBlock  Int
+  withdrawBlock Int?
+
   // Timestamps
-  depositTime     DateTime
-  withdrawTime    DateTime?
-  
+  depositTime  DateTime
+  withdrawTime DateTime?
+
   // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([depositTxHash])
   @@index([sourceChainId, targetChainId])
   @@index([status])
@@ -89,48 +89,23 @@ model Transfer {
 }
 
 model ChainSync {
-  id              String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Chain info
-  chainId         Int      @unique
-  chainName       String
-  
+  chainId   Int    @unique
+  chainName String
+
   // Sync state
   lastBlockNumber Int
   lastBlockHash   String
   lastSyncedAt    DateTime @default(now())
-  
-  // Stats
-  totalEvents     Int      @default(0)
-  
-  // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  @@index([chainId])
-}
 
-model Stats {
-  id                String   @id @default(uuid())
-  
-  // Date for daily stats
-  date              DateTime @unique
-  
-  // Volume stats
-  totalVolume       String   @default("0")
-  totalTransfers    Int      @default(0)
-  
-  // Chain-specific stats (stored as JSON)
-  volumeByChain     Json     @default("{}")
-  transfersByChain  Json     @default("{}")
-  
-  // Token stats
-  volumeByToken     Json     @default("{}")
-  transfersByToken  Json     @default("{}")
-  
+  // Stats
+  totalEvents Int @default(0)
+
   // Metadata
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  @@index([date])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chainId])
 }

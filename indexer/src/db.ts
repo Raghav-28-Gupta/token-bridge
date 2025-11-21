@@ -128,15 +128,15 @@ export async function createOrUpdateTransfer(data: {
 }) {
 	const update: Record<string, unknown> = { status: data.status };
 
-     if (data.withdrawTxHash !== undefined) update.withdrawTxHash = data.withdrawTxHash;
-     if (data.withdrawBlock !== undefined) update.withdrawBlock = data.withdrawBlock;
-     if (data.withdrawTime !== undefined) update.withdrawTime = data.withdrawTime;
+	if (data.withdrawTxHash !== undefined) update.withdrawTxHash = data.withdrawTxHash;
+	if (data.withdrawBlock !== undefined) update.withdrawBlock = data.withdrawBlock;
+	if (data.withdrawTime !== undefined) update.withdrawTime = data.withdrawTime;
 
-     return await prisma.transfer.upsert({
-          where: { depositTxHash: data.depositTxHash },
-          update,
-          create: data,
-     });
+	return await prisma.transfer.upsert({
+		where: { depositTxHash: data.depositTxHash },
+		update,
+		create: data,
+	});
 }
 
 export async function getTransferByDepositHash(txHash: string) {
@@ -224,29 +224,9 @@ export async function getPendingTransfers() {
 	});
 }
 
-// Stats Functions
-export async function getTotalVolume() {
-	const result = await prisma.transfer.aggregate({
-		where: { status: "completed" },
-		_count: true,
-	});
-	return result._count;
-}
-
-export async function getVolumeByChain(chainId: number) {
-	const deposits = await prisma.bridgeEvent.count({
-		where: { chainId, eventType: "Deposit" },
-	});
-
-	const withdraws = await prisma.bridgeEvent.count({
-		where: { chainId, eventType: "Withdraw" },
-	});
-
-	return { deposits, withdraws, total: deposits + withdraws };
-}
-
 export async function getChainSyncStatus() {
 	return await prisma.chainSync.findMany({
 		orderBy: { chainId: "asc" },
 	});
 }
+

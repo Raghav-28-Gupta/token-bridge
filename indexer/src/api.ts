@@ -1,7 +1,6 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import "express-async-errors";
 import cors from "cors";
-import * as pinoHttp from "pino-http";
 import { z } from "zod";
 import { config } from "./config.js";
 import { logger } from "./logger.js";
@@ -12,23 +11,22 @@ import {
 	getTransfersByAddress,
 	getTransferByDepositHash,
 	getPendingTransfers,
-	getTotalVolume,
-	getVolumeByChain,
-	getChainSyncStatus,
 	prisma,
 } from "./db.js";
 
 const app = express();
 
-// Middleware
+// Simplified Middleware
 app.use(cors({ origin: config.api.corsOrigin }));
 app.use(express.json());
-app.use(
-	(pinoHttp as any).default({
-          logger,
-          autoLogging: { ignore: (req: { url: string }) => req.url === "/health" },
-     })
-);
+
+// Simple request logger
+app.use((req, res, next) => {
+	if (req.url !== "/health") {
+		logger.info(`${req.method} ${req.url}`);
+	}
+	next();
+});
 
 // Validation schemas
 const addressSchema = z.string().regex(/^0x[a-fA-F0-9]{40}$/);
@@ -170,128 +168,6 @@ app.get("/transfers/tx/:txHash", async (req: Request, res: Response) => {
 	});
 });
 
-// Stats Endpoints
-
-/**
- * GET /stats
- * Get overall bridge statistics
- */
-app.get("/stats", async (req: Request, res: Response) => {
-	const [totalTransfers, chainSyncStatus] = await Promise.all([
-		getTotalVolume(),
-		getChainSyncStatus(),
-	]);
-
-	// Calculate volume by chain
-	const volumeByChain: Record<number, any> = {};
-	for (const chain of chainSyncStatus) {
-		volumeByChain[chain.chainId] = await getVolumeByChain(chain.chainId);
-	}
-
-	res.json({
-		success: true,
-		data: {
-			totalTransfers,
-			chainSyncStatus,
-			volumeByChain,
-		},
-	});
-});
-
-/**
- * GET /stats/chain/:chainId
- * Get statistics for specific chain
- */
-app.get("/stats/chain/:chainId", async (req: Request, res: Response) => {
-	const chainId = chainIdSchema.parse(parseInt(req.params.chainId!));
-
-	const volume = await getVolumeByChain(chainId);
-	const syncStatus = await prisma.chainSync.findUnique({
-		where: { chainId },
-	});
-
-	res.json({
-		success: true,
-		data: {
-			chainId,
-			volume,
-			syncStatus,
-		},
-	});
-});
-
-/**
- * GET /stats/volume
- * Get volume statistics
- */
-app.get("/stats/volume", async (req: Request, res: Response) => {
-	// Get completed transfers grouped by token
-	const volumeByToken = await prisma.bridgeEvent.groupBy({
-		by: ["token"],
-		where: { eventType: "Deposit" },
-		_count: true,
-	});
-
-	// Get daily volume
-	const now = new Date();
-	const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-	const last24Hours = await prisma.transfer.count({
-		where: {
-			depositTime: {
-				gte: yesterday,
-			},
-		},
-	});
-
-	res.json({
-		success: true,
-		data: {
-			volumeByToken,
-			last24Hours,
-		},
-	});
-});
-
-// Sync Status Endpoints
-
-/**
- * GET /sync
- * Get sync status for all chains
- */
-app.get("/sync", async (req: Request, res: Response) => {
-	const syncStatus = await getChainSyncStatus();
-
-	res.json({
-		success: true,
-		data: syncStatus,
-	});
-});
-
-/**
- * GET /sync/:chainId
- * Get sync status for specific chain
- */
-app.get("/sync/:chainId", async (req: Request, res: Response) => {
-	const chainId = chainIdSchema.parse(parseInt(req.params.chainId!));
-
-	const syncStatus = await prisma.chainSync.findUnique({
-		where: { chainId },
-	});
-
-	if (!syncStatus) {
-		return res.status(404).json({
-			success: false,
-			error: "Chain not found",
-		});
-	}
-
-	res.json({
-		success: true,
-		data: syncStatus,
-	});
-});
-
 // Error Handling
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -325,8 +201,7 @@ export function startAPI(): Promise<void> {
 	return new Promise((resolve) => {
 		app.listen(config.api.port, config.api.host, () => {
 			logger.info(
-				{ port: config.api.port, host: config.api.host },
-				"API server started"
+				`API server started on ${config.api.host}:${config.api.port}`
 			);
 			resolve();
 		});

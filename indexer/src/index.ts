@@ -33,43 +33,26 @@ async function main() {
 		await indexer.start();
 		logger.info("✓ Indexer started");
 
-		// Handle graceful shutdown
-		process.on("SIGINT", async () => {
-			logger.info("Received SIGINT, shutting down gracefully...");
-			await shutdown(indexer);
-		});
+		// Simplified graceful shutdown
+		const shutdown = async () => {
+			logger.info("Shutting down gracefully...");
+			try {
+				await indexer.stop();
+				await disconnectDatabase();
+				logger.info("Shutdown complete");
+				process.exit(0);
+			} catch (error) {
+				logger.error({ err: error }, "Error during shutdown");
+				process.exit(1);
+			}
+		};
 
-		process.on("SIGTERM", async () => {
-			logger.info("Received SIGTERM, shutting down gracefully...");
-			await shutdown(indexer);
-		});
-
-		// Handle uncaught errors
-		process.on("uncaughtException", (error) => {
-			logger.error({ err: error }, "Uncaught exception");
-			process.exit(1);
-		});
-
-		process.on("unhandledRejection", (reason, promise) => {
-			logger.error({ reason, promise }, "Unhandled rejection");
-			process.exit(1);
-		});
+		process.on("SIGINT", shutdown);
+		process.on("SIGTERM", shutdown);
 
 		logger.info("🚀 Bridge indexer is running");
 	} catch (error) {
 		logger.error({ err: error }, "Failed to start indexer");
-		process.exit(1);
-	}
-}
-
-async function shutdown(indexer: any) {
-	try {
-		await indexer.stop();
-		await disconnectDatabase();
-		logger.info("Shutdown complete");
-		process.exit(0);
-	} catch (error) {
-		logger.error({ err: error }, "Error during shutdown");
 		process.exit(1);
 	}
 }
@@ -79,3 +62,4 @@ main().catch((error) => {
 	logger.error({ err: error }, "Fatal error");
 	process.exit(1);
 });
+
