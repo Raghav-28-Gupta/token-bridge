@@ -1,6 +1,6 @@
 # Bridge Backend Relayer
 
-Production-ready backend service that listens for deposit events on source chains and relays withdrawals to target chains with validator signatures.
+Backend service that listens for deposit events on source chains and relays withdrawals to target chains with validator signatures.
 
 ## Features
 
@@ -11,7 +11,7 @@ Production-ready backend service that listens for deposit events on source chain
 ✅ **Gas optimization** - Estimates gas with configurable buffers  
 ✅ **Error handling** - Comprehensive retry logic with exponential backoff  
 ✅ **Database persistence** - Track all transactions and state  
-✅ **Structured logging** - Pino logger with pretty output  
+✅ **Simple logging** - Console-based logging for easy debugging  
 ✅ **Graceful shutdown** - Clean shutdown on SIGINT/SIGTERM  
 
 ## Architecture
@@ -271,18 +271,12 @@ These are logged and marked as failed in the database.
 
 ### Logs
 
-All operations are logged with structured data:
+All operations are logged to console:
 
 ```
-[12:34:56] INFO: Deposit detected: 100.0 USDC from 0x123... -> 0x456...
-  token: "0xA0b86..."
-  nonce: 42
-  sourceChain: 1
-  targetChain: 137
+[2024-01-01T12:34:56.000Z] INFO: Deposit detected: 100.0 USDC from 0x123... -> 0x456... {"type":"deposit","token":"0xA0b86...","nonce":42,"sourceChain":1,"targetChain":137}
   
-[12:35:10] INFO: Withdrawal processed: 100.0 USDC to 0x456...
-  txHash: "0xabc..."
-  gasUsed: "150000"
+[2024-01-01T12:35:10.000Z] INFO: Withdrawal processed: 100.0 USDC to 0x456... {"type":"withdrawal","txHash":"0xabc...","gasUsed":"150000"}
 ```
 
 ### Database Queries
