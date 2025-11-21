@@ -257,58 +257,58 @@ export class BridgeIndexer {
 		}
 	}
 
-	async syncFromBlock(chainId: number, fromBlock: number): Promise<void> {
-		const indexer = this.indexers.get(chainId);
-		if (!indexer) {
-			throw new Error(`Chain ${chainId} not initialized`);
-		}
+	// async syncFromBlock(chainId: number, fromBlock: number): Promise<void> {
+	// 	const indexer = this.indexers.get(chainId);
+	// 	if (!indexer) {
+	// 		throw new Error(`Chain ${chainId} not initialized`);
+	// 	}
 
-		logger.info({ chainId, fromBlock }, "Starting historical sync");
+	// 	logger.info({ chainId, fromBlock }, "Starting historical sync");
 
-		indexer.lastBlock = fromBlock - 1;
+	// 	indexer.lastBlock = fromBlock - 1;
 
-		// Process in batches until caught up
-		const currentBlock = await indexer.provider.getBlockNumber();
-		let processedBlock = fromBlock;
+	// 	// Process in batches until caught up
+	// 	const currentBlock = await indexer.provider.getBlockNumber();
+	// 	let processedBlock = fromBlock;
 
-		while (processedBlock < currentBlock) {
-			const toBlock = Math.min(
-				processedBlock + config.indexing.batchSize,
-				currentBlock
-			);
+	// 	while (processedBlock < currentBlock) {
+	// 		const toBlock = Math.min(
+	// 			processedBlock + config.indexing.batchSize,
+	// 			currentBlock
+	// 		);
 
-			await this.processEventType(
-				indexer,
-				"Deposit",
-				processedBlock,
-				toBlock
-			);
-			await this.processEventType(
-				indexer,
-				"Withdraw",
-				processedBlock,
-				toBlock
-			);
+	// 		await this.processEventType(
+	// 			indexer,
+	// 			"Deposit",
+	// 			processedBlock,
+	// 			toBlock
+	// 		);
+	// 		await this.processEventType(
+	// 			indexer,
+	// 			"Withdraw",
+	// 			processedBlock,
+	// 			toBlock
+	// 		);
 
-			const block = await indexer.provider.getBlock(toBlock);
-			if (block) {
-				await updateChainSync(chainId, toBlock, block.hash!, 0);
-			}
+	// 		const block = await indexer.provider.getBlock(toBlock);
+	// 		if (block) {
+	// 			await updateChainSync(chainId, toBlock, block.hash!, 0);
+	// 		}
 
-			indexer.lastBlock = toBlock;
-			processedBlock = toBlock + 1;
+	// 		indexer.lastBlock = toBlock;
+	// 		processedBlock = toBlock + 1;
 
-			logger.info(
-				{ chainId, fromBlock: processedBlock, toBlock, currentBlock },
-				"Historical sync progress"
-			);
-		}
+	// 		logger.info(
+	// 			{ chainId, fromBlock: processedBlock, toBlock, currentBlock },
+	// 			"Historical sync progress"
+	// 		);
+	// 	}
 
-		logger.info(
-			{ chainId, toBlock: currentBlock },
-			"Historical sync complete"
-		);
-	}
+	// 	logger.info(
+	// 		{ chainId, toBlock: currentBlock },
+	// 		"Historical sync complete"
+	// 	);
+	// }
 }
 
 // Singleton instance
