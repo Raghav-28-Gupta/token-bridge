@@ -17,3 +17,5 @@ export const ABIS = {
   Bridge: BridgeABI,
   BridgeToken: BridgeTokenABI,
 };
+
+export { BridgeABI, BridgeTokenABI };

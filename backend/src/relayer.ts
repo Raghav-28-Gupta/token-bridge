@@ -24,13 +24,10 @@ import {
 	getGasPrice,
 	formatAmount,
 } from "./utils.js";
+import { BridgeABI } from "@bridge/shared";
 
-const BRIDGE_ABI = [
-	"event Deposit(address indexed token, address indexed sender, address indexed recipient, uint256 amount, uint256 nonce, uint256 targetChainId)",
-	"function withdraw(address token, address recipient, uint256 amount, uint256 nonce, uint256 sourceChainId, bytes[] signatures) external",
-	"function isProcessed(bytes32 messageHash) external view returns (bool)",
-	"function supportedTokens(address) external view returns (bool)",
-];
+const BRIDGE_ABI = BridgeABI;
+
 
 interface ChainState {
 	provider: ethers.Provider;

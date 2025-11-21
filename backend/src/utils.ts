@@ -1,5 +1,15 @@
 import { ethers } from "ethers";
 import { logger } from "./logger.js";
+import {
+	isValidAddress as isValidAddressShared,
+	isValidTxHash as isValidTxHashShared,
+	normalizeAddress as normalizeAddressShared,
+} from "@bridge/shared";
+
+// Re-export shared validation functions
+export const isValidAddress = isValidAddressShared;
+export const isValidTxHash = isValidTxHashShared;
+export const normalizeAddress = normalizeAddressShared;
 
 /**
  * Retry a function with exponential backoff
@@ -19,7 +29,7 @@ export async function retry<T>(
 
 			if (i < maxRetries - 1) {
 				const delay = baseDelay * Math.pow(2, i);
-				logger.warn({ attempt: i + 1, maxRetries, delay }, `Retrying after error: ${lastError.message}`); 
+				logger.warn({ attempt: i + 1, maxRetries, delay }, `Retrying after error: ${lastError.message}`);
 				await sleep(delay);
 			}
 		}
@@ -155,20 +165,6 @@ export function isRetryableError(error: Error): boolean {
 	return retryableMessages.some((msg) =>
 		error.message.toLowerCase().includes(msg.toLowerCase())
 	);
-}
-
-/**
- * Validate Ethereum address
- */
-export function isValidAddress(address: string): boolean {
-	return ethers.isAddress(address);
-}
-
-/**
- * Validate transaction hash
- */
-export function isValidTxHash(hash: string): boolean {
-	return /^0x[a-fA-F0-9]{64}$/.test(hash);
 }
 
 /**
