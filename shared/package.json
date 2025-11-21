@@ -1,5 +1,5 @@
 {
-  "name": "shared",
+  "name": "@bridge/shared",
   "version": "1.0.0",
   "description": "Shared types, constants, utilities, and ABIs used across all bridge services (backend, indexer, frontend).",
   "main": "index.js",

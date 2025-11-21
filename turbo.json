@@ -1,8 +1,16 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
   "pipeline": {
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "out/**"] },
-    "lint": {},
-    "test": { "dependsOn": ["build"] }
-  }
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "interactive": true
+    },
+    "test": {},
+    "lint": {}
+  },
+  "packages": ["backend", "indexer", "shared", "contracts"]
 }
