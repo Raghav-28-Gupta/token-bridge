@@ -1,0 +1,207 @@
+[
+	{
+		"type": "constructor",
+		"inputs": [
+			{
+				"name": "_validators",
+				"type": "address[]",
+				"internalType": "address[]"
+			},
+			{
+				"name": "_minValidators",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "_chainId",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "event",
+		"name": "Deposit",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "sender",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "recipient",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "nonce",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "targetChainId",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "Withdraw",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "recipient",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "nonce",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "sourceChainId",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "function",
+		"name": "deposit",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "recipient",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "targetChainId",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "withdraw",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "recipient",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "nonce",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "sourceChainId",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "signatures",
+				"type": "bytes[]",
+				"internalType": "bytes[]"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "isProcessed",
+		"inputs": [
+			{
+				"name": "messageHash",
+				"type": "bytes32",
+				"internalType": "bytes32"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "supportedTokens",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	}
+]
