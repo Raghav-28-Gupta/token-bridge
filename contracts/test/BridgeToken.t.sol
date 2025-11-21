@@ -70,7 +70,7 @@ contract BridgeTokenTest is Test{
      
      function testOnlyBridgeCanMint() public {
           vm.prank(user);
-          vm.expectRevert("Only bridge can call");
+          vm.expectRevert("Only Bridge can call");
           token.mint(user, 100 ether);
      }
      

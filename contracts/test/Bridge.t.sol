@@ -57,6 +57,9 @@ contract BridgeTest is Test{
      event Deposit(address indexed token, address indexed sender, address indexed recipient, uint256 amount, uint256 nonce, uint256 targetChainId);
      event withdraw(address indexed token, address indexed recipient, uint256 amount, uint256 nonce, uint256 SourceChainId);
 
+     error EnforcedPause();
+     error OwnableUnauthorizedAccount(address account);
+
      function setUp() public {
           owner = address(this);
           validator1 = vm.addr(validator1Key);
@@ -128,7 +131,7 @@ contract BridgeTest is Test{
         bridge.pause();
         
         vm.prank(user);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         bridge.deposit(address(token), 100 ether, user, SOURCE_CHAIN);
      }
 
@@ -147,6 +150,8 @@ contract BridgeTest is Test{
           // fund bridge with tokens
           token.mint(address(bridge), amount);
 
+          uint256 balanceBefore = token.balanceOf(user);
+
           bytes32 messageHash = bridge.getMessageHash(address(token), user, amount, nonce, SOURCE_CHAIN);
 
           // get signatures from validators
@@ -156,7 +161,7 @@ contract BridgeTest is Test{
 
           bridge.withdraw(address(token), user, amount, nonce, SOURCE_CHAIN, signatures);
 
-          assertEq(bridgeToken.balanceOf(user), amount);
+          assertEq(token.balanceOf(user), balanceBefore + amount);
      }
 
      function testWithdrawNativeToken() public {
@@ -251,7 +256,7 @@ contract BridgeTest is Test{
      
      function testOnlyOwnerCanAddValidator() public {
           vm.prank(user);
-          vm.expectRevert("Ownable: caller is not the owner");
+          vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, user));
           bridge.addValidator(makeAddr("newValidator"));
      }
 }
