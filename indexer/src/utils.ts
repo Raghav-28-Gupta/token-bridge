@@ -1,5 +1,13 @@
 import { ethers } from 'ethers';
 import { logger } from './logger.js';
+import {
+  isValidAddress as isValidAddressShared,
+  normalizeAddress as normalizeAddressShared,
+} from '@bridge/shared';
+
+// Re-export shared validation functions
+export const isValidAddress = isValidAddressShared;
+export const normalizeAddress = normalizeAddressShared;
 
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -17,7 +25,7 @@ export async function retry<T>(
       return await fn();
     } catch (error) {
       lastError = error as Error;
-      
+
       if (i < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, i);
         logger.warn(
@@ -41,14 +49,6 @@ export async function getBlockTimestamp(
     throw new Error(`Block ${blockNumber} not found`);
   }
   return new Date(block.timestamp * 1000);
-}
-
-export function normalizeAddress(address: string): string {
-  return address.toLowerCase();
-}
-
-export function isValidAddress(address: string): boolean {
-  return ethers.isAddress(address);
 }
 
 export function formatAmount(amount: string | bigint, decimals: number = 18): string {

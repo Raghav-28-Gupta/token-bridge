@@ -8,11 +8,10 @@ import {
 } from "./db.js";
 import { EventProcessor } from "./event-processor.js";
 import { retry, sleep } from "./utils.js";
+import { BridgeABI } from "@bridge/shared";
 
-const BRIDGE_ABI = [
-	"event Deposit(address indexed token, address indexed sender, address indexed recipient, uint256 amount, uint256 nonce, uint256 targetChainId)",
-	"event Withdraw(address indexed token, address indexed recipient, uint256 amount, uint256 nonce, uint256 sourceChainId)",
-];
+const BRIDGE_ABI = BridgeABI;
+
 
 interface ChainIndexer {
 	chainId: number;
@@ -229,18 +228,18 @@ export class BridgeIndexer {
 		toBlock: number
 	): Promise<number> {
 		try {
-               if (!indexer.contract || !indexer.contract.filters) {
-                    logger.warn({ chainId: indexer.chainId }, "Contract or filters not available");
-                    return 0;
-               }
+			if (!indexer.contract || !indexer.contract.filters) {
+				logger.warn({ chainId: indexer.chainId }, "Contract or filters not available");
+				return 0;
+			}
 
 			const depositFilter = indexer.contract.filters.Deposit?.();
 			const withdrawFilter = indexer.contract.filters.Withdraw?.();
 
-               if (!depositFilter || !withdrawFilter) {
-                    logger.warn({ chainId: indexer.chainId }, "Deposit or Withdraw filter not found in ABI");
-                    return 0;
-               }
+			if (!depositFilter || !withdrawFilter) {
+				logger.warn({ chainId: indexer.chainId }, "Deposit or Withdraw filter not found in ABI");
+				return 0;
+			}
 
 			const [deposits, withdraws] = await Promise.all([
 				indexer.contract.queryFilter(depositFilter, fromBlock, toBlock),
