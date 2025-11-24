@@ -10,7 +10,6 @@ contract DeployBridge is Script {
           uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
           uint256 chainId = block.chainid;
 
-          // Load validator addresses from environment
           address[] memory validators = new address[](3);
           validators[0] = vm.envAddress("VALIDATOR_1");
           validators[1] = vm.envAddress("VALIDATOR_2");
@@ -45,13 +44,9 @@ contract DeployBridgeToken is Script {
           uint8 decimals = uint8(vm.envUint("TOKEN_DECIMALS"));
 
           vm.startBroadcast(deployerPrivateKey);
-
-          BridgeToken token = new BridgeToken(
-               name,
-               symbol,
-               decimals,
-               bridgeAddress
-          );
+          
+          // Deploys individual BridgeToken contracts
+          BridgeToken token = new BridgeToken(name, symbol, decimals, bridgeAddress);
 
           console.log("BridgeToken deployed at:", address(token));
           console.log("Name:", name);

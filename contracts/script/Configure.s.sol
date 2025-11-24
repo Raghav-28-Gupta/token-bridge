@@ -31,7 +31,8 @@ contract AddValidators is Script {
         }
 
         vm.startBroadcast(deployerPrivateKey);
-
+        
+        // creating a reference to an existing Bridge contract so we can call its functions
         Bridge bridge = Bridge(payable(bridgeAddress));
 
         console.log("\n=== Adding Validators ===");

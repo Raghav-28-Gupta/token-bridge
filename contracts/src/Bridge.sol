@@ -78,7 +78,9 @@ contract Bridge is IBridge, Ownable, ReentrancyGuard, Pausable{
         }
 
         uint256 nonce = depositNonce++;
-
+        
+        // NOTE: The recipient field is NOT where the money goes during deposit. It's metadata that says:
+        // "When this is withdrawn on the target chain (80001), send it to this recipient address"
         emit Deposit(
             token,
             msg.sender,
