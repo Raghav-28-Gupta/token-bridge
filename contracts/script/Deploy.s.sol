@@ -134,6 +134,7 @@ contract FullDeploy is Script {
 
           console.log("\n=== Bridge Tokens Deployed ===");
           for (uint256 i = 0; i < tokenNames.length; i++) {
+               // Deploys individual BridgeToken contracts
                BridgeToken token = new BridgeToken(
                     tokenNames[i],
                     tokenSymbols[i],
@@ -156,8 +157,7 @@ contract FullDeploy is Script {
 
           vm.stopBroadcast();
 
-          return
-               DeploymentResult({
+          return DeploymentResult({
                     bridge: address(bridge),
                     bridgeTokens: bridgeTokens,
                     tokenSymbols: tokenSymbols
