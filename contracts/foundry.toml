@@ -3,4 +3,11 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
+# RPC Endpoints - reads from your .env file
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+mainnet = "${ETHEREUM_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+anvil = "${ANVIL_RPC_URL}"
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
